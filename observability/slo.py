@@ -89,8 +89,19 @@ def evaluate_multiwindow_burn(
             "long_window_burn": long,
         }
 
-    # 4. Sustained slow burn (10% in 3 days -> ticket, no page)
+    # 4. Spike recovery: long window still has past burn, but short window has dropped/recovered
+    if short < 6.0 and long >= 6.0:
+        return {
+            "page": False,
+            "severity": "warning",
+            "reason": "spike_recovering_no_page (short window has cleared below threshold)",
+            "short_window_burn": short,
+            "long_window_burn": long,
+        }
+
+    # 5. Sustained slow burn (10% in 3 days -> ticket, no page)
     if short >= 1.0 and long >= 1.0:
+
         return {
             "page": False,
             "severity": "warning",
