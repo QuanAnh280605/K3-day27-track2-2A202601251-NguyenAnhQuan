@@ -40,10 +40,11 @@ def calculate_slo(target: float, bad_events: int | float, total_events: int | fl
 
 
 def evaluate_multiwindow_burn(
-    *,
-    short_window_burn: float,
-    long_window_burn: float,
+    short_window_burn: float = 0.0,
+    long_window_burn: float = 0.0,
     policy: str = "sre",
+    *args: Any,
+    **kwargs: Any,
 ) -> dict[str, Any]:
     """Evaluate multi-window multi-burn-rate alerting policy based on Google SRE principles.
     

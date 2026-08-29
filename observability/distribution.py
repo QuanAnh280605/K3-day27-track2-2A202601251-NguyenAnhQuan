@@ -7,11 +7,12 @@ from scipy import stats
 
 
 def detect_distribution_shift(
-    current_values: Iterable[float],
-    baseline_values: Iterable[float],
-    *,
+    current_values: Iterable[float] | Any,
+    baseline_values: Iterable[float] | Any,
     ratio_threshold: float = 3.0,
     p_value_threshold: float = 0.05,
+    *args: Any,
+    **kwargs: Any,
 ) -> dict[str, Any]:
     """Detect distribution drift using Kolmogorov-Smirnov (KS) test combined with mean ratio.
     

@@ -13,10 +13,11 @@ def approximate_token_lengths(texts: Iterable[str]) -> list[int]:
 
 
 def detect_text_length_shift(
-    current_texts: Iterable[str],
-    baseline_batch_means: Iterable[float],
-    *,
+    current_texts: Iterable[str] | Any,
+    baseline_batch_means: Iterable[float] | Any,
     threshold: float = 3.0,
+    *args: Any,
+    **kwargs: Any,
 ) -> dict[str, Any]:
     lengths = approximate_token_lengths(current_texts)
     current_mean = float(np.mean(lengths)) if lengths else 0.0
@@ -28,10 +29,11 @@ def detect_text_length_shift(
 
 
 def detect_embedding_norm_shift(
-    current_norms: Iterable[float],
-    baseline_norms: Iterable[float],
-    *,
+    current_norms: Iterable[float] | Any,
+    baseline_norms: Iterable[float] | Any,
     threshold: float = 3.0,
+    *args: Any,
+    **kwargs: Any,
 ) -> dict[str, Any]:
     """Detect embedding norm drift using z-score and statistical comparison against baseline."""
     clean_cur = [float(x) for x in current_norms if x is not None and np.isfinite(float(x))]
