@@ -46,12 +46,20 @@ def main() -> None:
     ).total_seconds() / 60.0
 
     docs = load_jsonl(ROOT / "data" / "incoming" / "kb_documents.jsonl")
+    kb_df = pd.DataFrame(docs)
+    kb_contract_path = ROOT / "contracts" / "kb_contract.yaml"
+    kb_failed = []
+    if kb_contract_path.exists() and not kb_df.empty:
+        kb_contract = load_contract(kb_contract_path)
+        kb_issues = validate_dataframe(kb_df, kb_contract)
+        kb_failed = failed_issues(kb_issues)
+
     text_result = detect_text_length_shift(
         [d["content"] for d in docs], history["mean_text_length"].tail(14).tolist()
     )
 
     # Demo SLO: one check event for this run.
-    bad = 1 if critical_failed else 0
+    bad = 1 if (critical_failed or kb_failed) else 0
     contract_slo = calculate_slo(0.999, bad_events=bad, total_events=1)
 
     with open(ROOT / "data" / "baseline" / "lineage_graph.json", "r", encoding="utf-8") as f:
@@ -63,6 +71,7 @@ def main() -> None:
         "orders_rows": int(len(orders)),
         "failed_contract_checks": len(failed),
         "critical_contract_failures": len(critical_failed),
+        "kb_failed_contract_checks": len(kb_failed),
         "row_count_anomaly": row_result,
         "freshness_minutes": freshness_minutes,
         "kb_text_length_signal": text_result,
@@ -76,6 +85,7 @@ def main() -> None:
     print(f"orders rows              : {len(orders)}")
     print(f"contract failed checks   : {len(failed)}")
     print(f"critical contract fails  : {len(critical_failed)}")
+    print(f"KB contract failed checks: {len(kb_failed)}")
     print(f"row-count anomaly        : {row_result['is_anomaly']} ({row_result['method']}, score={row_result['score']:.2f})")
     print(f"freshness minutes        : {freshness_minutes:.1f}")
     print(f"KB length anomaly        : {text_result['is_anomaly']}")
@@ -85,3 +95,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

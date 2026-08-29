@@ -14,6 +14,11 @@ def load_graph(path: str | Path) -> dict[str, list[str]]:
 
 def get_downstream_assets(graph: dict[str, list[str]], start: str) -> list[str]:
     """Return transitive downstream assets in BFS order, excluding start."""
+    if not graph or not isinstance(graph, dict) or not start:
+        return []
+    if "dataset_lineage" in graph and isinstance(graph["dataset_lineage"], dict):
+        graph = graph["dataset_lineage"]
+    
     seen = {start}
     q: deque[str] = deque([start])
     out: list[str] = []
@@ -30,11 +35,25 @@ def get_downstream_assets(graph: dict[str, list[str]], start: str) -> list[str]:
 def get_column_downstream(
     column_graph: dict[str, list[str]], start_column: str
 ) -> list[str]:
-    """TODO(student): implement column-level traversal.
+    """Return transitive downstream columns in BFS order, excluding start."""
+    if not column_graph or not isinstance(column_graph, dict) or not start_column:
+        return []
+    if "column_lineage" in column_graph and isinstance(column_graph["column_lineage"], dict):
+        column_graph = column_graph["column_lineage"]
+    
+    seen = {start_column}
+    q: deque[str] = deque([start_column])
+    out: list[str] = []
+    while q:
+        node = q.popleft()
+        for child in column_graph.get(node, []):
+            if child not in seen:
+                seen.add(child)
+                out.append(child)
+                q.append(child)
+    return out
 
-    Starter returns only direct children, so transitive hidden cases will fail.
-    """
-    return list(column_graph.get(start_column, []))
+
 
 
 def extract_dbt_dataset_graph(manifest_path: str | Path) -> dict[str, list[str]]:

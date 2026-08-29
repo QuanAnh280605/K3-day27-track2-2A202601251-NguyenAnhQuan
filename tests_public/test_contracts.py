@@ -50,3 +50,22 @@ def test_invalid_currency_is_detected():
     df.loc[0, "currency"] = "BTC"
     issues = failed(validate_orders(df, CONTRACT))
     assert any(i["check"] == "accepted_values" and i["column"] == "currency" for i in issues)
+
+
+def test_type_drift_is_detected():
+    df = healthy_df()
+    df["order_id"] = ["not_an_int", "also_not_int"]
+    issues = failed(validate_orders(df, CONTRACT))
+    assert any(i["check"] == "type" and i["column"] == "order_id" for i in issues)
+
+
+def test_freshness_delay_is_detected():
+    from datetime import datetime, timedelta, timezone
+    from src.contract_validator import load_contract, validate_dataframe
+    contract = load_contract(CONTRACT)
+    df = healthy_df()
+    # Mock stale data 2 hours ago
+    now = datetime(2026, 8, 28, 12, 10, tzinfo=timezone.utc)
+    issues = validate_dataframe(df, contract, now=now)
+    assert any(i["check"] == "freshness" and not i["passed"] for i in issues)
+
