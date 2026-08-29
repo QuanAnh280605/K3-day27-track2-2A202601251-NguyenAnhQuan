@@ -27,13 +27,13 @@ def validate_orders(df: pd.DataFrame, contract_path: str | Path | dict[str, Any]
 
 
 def detect_metric(
-    current: float,
-    history: Iterable[float],
-    *,
+    current: float | Any,
+    history: Iterable[float] | Any,
     method: str = "auto",
     context: dict[str, Any] | None = None,
+    **kwargs: Any,
 ) -> dict[str, Any]:
-    return detect_anomaly(current, history, method=method, context=context)
+    return detect_anomaly(current, history, method=method, context=context, **kwargs)
 
 
 def detect_distribution(current_values: Iterable[float], baseline_values: Iterable[float]) -> dict[str, Any]:
